@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+# dlitz 2024
+import argparse
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from xml.etree import ElementTree as ET
+
+
+@dataclass
+class USBAddress:
+    busnum: int
+    devnum: int
+
+
+@dataclass
+class USBVidPid:
+    vendor: int
+    product: int
+
+
+class USBAddressAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        busnum_str, devnum_str = values.split(":")
+        busnum = int(busnum_str)
+        devnum = int(devnum_str)
+        setattr(namespace, self.dest, USBAddress(busnum, devnum))
+
+
+class USBVidPidAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        if "/" in values:
+            # udev ENV{PRODUCT} format (idVendor/idProduct/bcdDevice)
+            vid_str, pid_str = values.split("/")[:2]
+        elif ":" in values:
+            # usbutils vendor:product format
+            vid_str, pid_str = values.split(":")[:2]
+        else:
+            raise ValueError(f"couldn't split value into vid:pid: {values!r}")
+        vid = int(vid_str, 16)
+        pid = int(pid_str, 16)
+        setattr(namespace, self.dest, USBVidPid(vid, pid))
+
+
+class BoolAction(argparse.Action):
+    def __init__(
+        self,
+        option_strings,
+        dest,
+        nargs=None,
+        const=None,
+        default=None,
+        type=None,
+        choices=None,
+        required=False,
+        help=None,
+        metavar=None,
+    ):
+        if metavar is None:
+            metavar = "BOOL"
+        super().__init__(
+            option_strings,
+            dest,
+            nargs,
+            const,
+            default,
+            type,
+            choices,
+            required,
+            help,
+            metavar,
+        )
+
+    def __call__(self, parser, namespace, values, option_string):
+        def maybe_int(values):
+            try:
+                return int(values, 0)
+            except ValueError:
+                return None
+
+        if values.lower() in ("yes", "y", "true", "t"):
+            v = True
+        elif values.lower() in ("no", "n", "false", "f"):
+            v = False
+        elif (v_int := maybe_int(values)) in (0, 1):
+            v = bool(v_int)
+        else:
+            raise ValueError(f"couldn't parse boolean: {values!r}")
+        setattr(namespace, self.dest, v)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser("attach a USB device to a libvirt instance")
+    parser.add_argument(
+        "-a",
+        "--action",
+        default="add",
+        help="'add' to attach; 'remove' to detach; other values ignored; default: %(default)s",
+    )
+    parser.add_argument(
+        "-s",
+        "--usb-address",
+        metavar="BUSNUM:DEVNUM",
+        action=USBAddressAction,
+        help="select by address",
+    )
+    parser.add_argument(
+        "-d",
+        "--usb-id",
+        metavar="VENDOR:PRODUCT",
+        action=USBVidPidAction,
+        help="select by hexadecimal vendor/product ID (separated by ':' or '/')",
+    )
+    parser.add_argument(
+        "--dump-xml",
+        action="store_true",
+        help="output XML instead of connecting to hypervisor",
+    )
+    parser.add_argument(
+        "--startupPolicy",
+        help="set source startupPolicy attribute",
+    )
+    parser.add_argument(
+        "--managed",
+        action=BoolAction,
+        default="yes",
+        help="set hostdev managed flag, (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--alias",
+        help="set alias name (libvirt needs this to start with 'ua-' to be useful)",
+    )
+    parser.add_argument(
+        "--live",
+        action="append_const",
+        dest="persistence_args",
+        const="--live",
+        help="pass --live to virsh attach-device/detach-device (default)",
+    )
+    parser.add_argument(
+        "--config",
+        action="append_const",
+        dest="persistence_args",
+        const="--config",
+        help="pass --config to virsh attach-device/detach-device",
+    )
+    parser.add_argument(
+        "--current",
+        action="append_const",
+        dest="persistence_args",
+        const="--current",
+        help="pass --current to virsh attach-device/detach-device",
+    )
+    parser.add_argument(
+        "--persistent",
+        action="append_const",
+        dest="persistence_args",
+        const="--persistent",
+        help="pass --persistent to virsh attach-device/detach-device",
+    )
+    parser.add_argument(
+        "-c",
+        "--connect",
+        metavar="URI",
+        help="connect to hypervisor URI",
+    )
+    parser.add_argument(
+        "domain",
+        nargs="?",
+        help="libvirt domain",
+    )
+
+    args = parser.parse_args()
+    if args.usb_address is None and args.usb_id is None:
+        parser.error("require one of: --usb-address or --usb-id")
+    if not args.dump_xml and not args.domain:
+        parser.error("one of '--dump-xml' or 'domain' arguments is needed")
+    if not args.persistence_args:
+        args.persistence_args = ["--live"]
+    return args, parser
+
+
+def make_xml(
+    usb_address=None,
+    usb_id=None,
+    managed=True,
+    alias=None,
+    startupPolicy=None,
+):
+    if usb_address is None and usb_id is None:
+        raise TypeError("missing search criteria")
+    e_hostdev = ET.Element(
+        "hostdev",
+        {"mode": "subsystem", "type": "usb", "managed": "yes" if managed else "no"},
+    )
+    attrs_source = {}
+    if startupPolicy is not None:
+        attrs_source["startupPolicy"] = startupPolicy
+    e_source = ET.SubElement(e_hostdev, "source", attrs_source)
+    if usb_address is not None:
+        ET.SubElement(
+            e_source,
+            "address",
+            {"bus": f"{usb_address.busnum:d}", "device": f"{usb_address.devnum:d}"},
+        )
+    if usb_id is not None:
+        ET.SubElement(e_source, "vendor", {"id": f"0x{usb_id.vendor:04x}"})
+        ET.SubElement(e_source, "product", {"id": f"0x{usb_id.product:04x}"})
+    if alias is not None:
+        ET.SubElement(e_hostdev, "alias", {"name": alias})
+    ET.indent(e_hostdev)
+    return ET.tostring(e_hostdev, encoding="UTF-8").decode()
+
+
+def main():
+    args, parser = parse_args()
+    device_xml_str = make_xml(
+        args.usb_address,
+        args.usb_id,
+        args.managed,
+        args.alias,
+        args.startupPolicy,
+    )
+    if args.dump_xml:
+        print(device_xml_str)
+        return
+
+    virsh_args = []
+    if args.connect:
+        virsh_args.append(f"--connect={args.connect}")
+    if args.action == "add":
+        virsh_args.append("attach-device")
+    elif args.action == "remove":
+        virsh_args.append("detach-device")
+    else:
+        print("Nothing to do", file=sys.stderr)
+        return
+    virsh_args += [
+        "--domain",
+        args.domain,
+        "--file",
+        "/dev/stdin",
+        *args.persistence_args,
+    ]
+    try:
+        subprocess.run(
+            ["virsh", *virsh_args],
+            input=device_xml_str,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        print(exc, file=sys.stderr)
+        sys.exit(exc.returncode)
+
+
+if __name__ == "__main__":
+    main()

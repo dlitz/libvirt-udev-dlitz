@@ -1,0 +1,20 @@
+# udev rules for automatically attaching a device to a domain
+#
+# To use this, put something like this into a file in /etc/udev/rules.d:
+#
+#   # Sierra Wireless, Inc. AirPrime MC7455 3G/4G LTE Modem
+#   SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="1199/9071/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+#
+# Note that ENV{PRODUCT} should be used instead of ATTR{idVendor}/ATTR{idProduct}.
+# Otherwise, the device config will not be removed from the VM when the device
+# is removed.
+
+# Deauthorize the device on the host
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{LIBVIRT_ATTACH}!="", \
+  ENV{LIBVIRT_ATTACH_DEAUTHORIZE}!="0", ATTR{authorized}="0"
+
+# Attach/detach USB devices to libvirt domains
+ACTION=="add|remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{LIBVIRT_ATTACH}!="", \
+  RUN+="libvirt-attach-usb -a %E{ACTION} -s %E{BUSNUM}:%E{DEVNUM} -d %E{PRODUCT} %E{LIBVIRT_ATTACH}"
+
+# vim:set ft=udevrules sw=2 et:
