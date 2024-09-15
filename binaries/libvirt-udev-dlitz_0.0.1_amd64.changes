@@ -1,0 +1,42 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Format: 1.8
+Date: Sat, 14 Sep 2024 21:51:45 MDT
+Source: libvirt-udev-dlitz
+Binary: libvirt-udev-dlitz
+Architecture: source all
+Version: 0.0.1
+Distribution: dlitz-aptly
+Urgency: medium
+Maintainer: Darsey Litzenberger <dlitz@dlitz.net>
+Changed-By: Darsey Litzenberger <dlitz@dlitz.net>
+Description:
+ libvirt-udev-dlitz - udev rules for attaching hotplugged devices to a libvirt VM
+Checksums-Sha1:
+ d77676c47338a2bccfb9aa81b754ed8af571eb63 1048 libvirt-udev-dlitz_0.0.1.dsc
+ 9821783b872191ca15379a67e30ef577927be6b5 4108 libvirt-udev-dlitz_0.0.1.tar.xz
+ 5f15f2582456562c0ed5c472f6996f916bfde707 4524 libvirt-udev-dlitz_0.0.1_all.deb
+ 76bad1a8e14d3db8cdcd3dcddb271540ae28c489 5382 libvirt-udev-dlitz_0.0.1_amd64.buildinfo
+Checksums-Sha256:
+ 2ef1c13b9b7b430a38aa8111ddb927cd0e34d02f58f8ddc55d827cdccee2866c 1048 libvirt-udev-dlitz_0.0.1.dsc
+ 354b73bf5afe8444caab0dedd40e4f92d9b439deae189b2741f155889399c85f 4108 libvirt-udev-dlitz_0.0.1.tar.xz
+ 43f65ee851597e3f2732fcb393319791499caa9a86088b4c51a40c7798037106 4524 libvirt-udev-dlitz_0.0.1_all.deb
+ 3fe62a2f9d33de71dec3991a0f7bfb10abf8779b0fb683d9f4984aa272659fe6 5382 libvirt-udev-dlitz_0.0.1_amd64.buildinfo
+Changes:
+ libvirt-udev-dlitz (0.0.1) dlitz-aptly; urgency=medium
+ .
+   * Initial release.
+Files:
+ 87f68a8965b2b56c6dfb12fde906d1df 1048 admin optional libvirt-udev-dlitz_0.0.1.dsc
+ 2476bb77a81a35e75c90b9ab3f6d17d2 4108 admin optional libvirt-udev-dlitz_0.0.1.tar.xz
+ 8b0d373a6866f73f1a48ee61144a28d7 4524 admin optional libvirt-udev-dlitz_0.0.1_all.deb
+ 754aef114feaacf0bb422224a0cb4728 5382 admin optional libvirt-udev-dlitz_0.0.1_amd64.buildinfo
+
+-----BEGIN PGP SIGNATURE-----
+
+iIYEARYKAC4WIQTWkd0xNWtIORg6n8DjQLK2WJpUpAUCZuZZ3xAcZGxpdHpAZGxp
+dHoubmV0AAoJEONAsrZYmlSkZeoBAJqjTU87qubj4ONDqk80enqTQnf6tfAssdmE
+oqVWURTQAQDfhMtJttd4Q+u2PZOjQzKOT+dyLT1eSXoAy9jupgK2CQ==
+=aBpX
+-----END PGP SIGNATURE-----
