@@ -1,5 +1,5 @@
-libvirt-udev-dlitz (0.0.0) UNRELEASED; urgency=medium
+libvirt-udev-dlitz (0.0.1) dlitz-aptly; urgency=medium
 
   * Initial release.
 
- -- Darsey Litzenberger <dlitz@dlitz.net>  Sat, 14 Sep 2024 16:55:48 -0600
+ -- Darsey Litzenberger <dlitz@dlitz.net>  Sat, 14 Sep 2024 21:41:35 -0600
