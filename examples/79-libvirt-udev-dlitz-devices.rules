@@ -1,0 +1,20 @@
+# Copy this file to /etc/udev/rules.d/ and edit as needed
+
+# Sierra Wireless, Inc. AirPrime MC7455 3G/4G LTE Modem
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="1199/9071/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+
+# Quectel Wireless Solutions Co., Ltd. EC25 LTE modem
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="2c7c/125/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+
+# KuWfi 4G LTE WiFi modem
+# MediaTek Inc. Cyrus Technology CS 24
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="e8d/2008/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+
+# 1199:0fff Sierra Wireless, Inc. USB MMC Storage
+# 1199:68a3 Sierra Wireless, Inc. MC8700 Modem
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="1199/0fff/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="1199/68a3/*", ENV{LIBVIRT_ATTACH}="modem-vm"
+
+# for debugging
+# ATECH FLASH TECHNOLOGY UHSII uSD Reader
+#SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="11b0/3307/*", OPTIONS+="log_level=debug", ENV{LIBVIRT_ATTACH}="modem-vm"
