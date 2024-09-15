@@ -1,18 +1,20 @@
 Source: libvirt-udev-dlitz
-Section: unknown
+Section: admin
 Priority: optional
 Maintainer: Darsey Litzenberger <dlitz@dlitz.net>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
 Standards-Version: 4.7.0
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Browser: https://salsa.debian.org/debian/libvirt-udev-dlitz
-#Vcs-Git: https://salsa.debian.org/debian/libvirt-udev-dlitz.git
+Homepage: https://github.com/dlitz/libvirt-udev-dlitz
+Vcs-Browser: https://github.com/dlitz/libvirt-udev-dlitz
+Vcs-Git: https://github.com/dlitz/libvirt-udev-dlitz.git
 
 Package: libvirt-udev-dlitz
 Architecture: all
 Depends:
+ python3 (>= 3.9),
  ${misc:Depends},
-Description: <insert up to 60 chars description>
- <Insert long description, indented with spaces.>
+Description: udev rules for attaching hotplugged devices to a libvirt VM
+ This package provides udev rules for automatically attachking hotplugged
+ devices (e.g. USB) to a libvirt virtual machine.
