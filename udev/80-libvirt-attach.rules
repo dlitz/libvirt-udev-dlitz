@@ -11,7 +11,7 @@
 
 # Deauthorize the device on the host
 ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{LIBVIRT_ATTACH}!="", \
-  ENV{LIBVIRT_ATTACH_DEAUTHORIZE}!="0", ATTR{authorized}="0"
+  ENV{LIBVIRT_ATTACH_DEAUTHORIZE}=="1", ATTR{authorized}="0"
 
 # Attach/detach USB devices to libvirt domains
 ACTION=="add|remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{LIBVIRT_ATTACH}!="", \
