@@ -1,3 +1,10 @@
+libvirt-udev-dlitz (0.0.2) dlitz-aptly; urgency=medium
+
+  * Add example udev rules
+  * Don't deauthorize USB by default
+
+ -- Darsey Litzenberger <dlitz@dlitz.net>  Thu, 19 Sep 2024 18:20:03 -0600
+
 libvirt-udev-dlitz (0.0.1) dlitz-aptly; urgency=medium
 
   * Initial release.
